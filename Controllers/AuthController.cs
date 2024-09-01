@@ -1,7 +1,7 @@
 ﻿using Alianza.Models;
 using Alianza.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alianza.Controllers
 {
@@ -19,29 +19,49 @@ namespace Alianza.Controllers
             _tokenService = tokenService;
         }
 
-        // POST: api/Auth/Login
         [HttpPost ( "Login" )]
-        public IActionResult Login ( [FromBody] LoginRequest loginRequest )
+        public async Task<IActionResult> LoginAsync ( [FromBody] LoginRequest loginRequest )
         {
-            // Aquí deberías implementar la lógica de autenticación para verificar las credenciales
-            // Por simplicidad, vamos a asumir que son válidas
             try
             {
-                if (loginRequest.Email == "omar.cortes.casillas@gmail.com" && loginRequest.Password == "Admin2024")
+                // Buscar el usuario directamente en la base de datos en lugar de cargar todos los usuarios
+                var encryptedPassword = EncryptPasswords.EncryptPassword ( loginRequest.Password );
+                var user = await _context.Users
+                    .FirstOrDefaultAsync ( user => user.Email == loginRequest.Email && user.Password == encryptedPassword );
+
+                if (user != null)
                 {
                     var token = _tokenService.GenerateToken ( loginRequest.Email );
-                    return Ok ( new { Token = token } );
+
+                    // Crear el objeto ResponseData para la respuesta exitosa
+                    var response = new ResponseData
+                    {
+                        Data = new { Token = token } ,
+                        Message = "Autenticación exitosa" ,
+                        Status = 200 // Código de estado HTTP 200 (OK)
+                    };
+
+                    return Ok ( response );
                 }
 
-                return Unauthorized ( );
+                // Respuesta en caso de credenciales incorrectas
+                return Unauthorized ( new ResponseData
+                {
+                    Data = null ,
+                    Message = "Credenciales incorrectas" ,
+                    Status = 401 // Código de estado HTTP 401 (Unauthorized)
+                } );
             }
             catch (Exception ex)
             {
-                exception = ex;
+                // Manejo de la excepción y devolución de un mensaje de error apropiado
+                return BadRequest ( new ResponseData
+                {
+                    Data = null ,
+                    Message = $"Error al intentar iniciar sesión: {ex.Message}" ,
+                    Status = 400 // Código de estado HTTP 400 (Bad Request)
+                } );
             }
-
-            return BadRequest ( exception.Message );
-
         }
     }
 

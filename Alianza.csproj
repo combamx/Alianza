@@ -20,7 +20,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\ResponseData.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="efpt.config.json.user" />
+    <None Include="Services\ResponseData.cs" />
   </ItemGroup>
 
   <ItemGroup>
