@@ -30,7 +30,7 @@ builder.Services.AddScoped<TokenService> ( ); // <--- Registrar el servicio aquí
 
 // Configurar JWT
 var jwtSettings = builder.Configuration.GetSection ( "JwtSettings" );
-var secretKey = jwtSettings [ "SecretKey" ];
+var secretKeys = jwtSettings [ "SecretKey" ];
 
 builder.Services.AddAuthentication ( options =>
 {
@@ -47,7 +47,30 @@ builder.Services.AddAuthentication ( options =>
         ValidateIssuerSigningKey = true ,
         ValidIssuer = jwtSettings [ "Issuer" ] , // URL local
         ValidAudience = jwtSettings [ "Audience" ] , // URL local
-        IssuerSigningKey = new SymmetricSecurityKey ( Encoding.UTF8.GetBytes ( secretKey ) )
+        IssuerSigningKey = new SymmetricSecurityKey ( Encoding.UTF8.GetBytes ( secretKeys ) )
+    };
+
+    // Configurar manejo de errores de autenticación
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = async context =>
+        {
+            // Evitar la respuesta predeterminada para un error 401
+            context.HandleResponse ( );
+
+            // Crear el objeto ResponseData con el mensaje de error
+            var response = new ResponseData
+            {
+                Data = null ,
+                Message = "No autorizado: Token no válido o faltante." ,
+                Status = 401
+            };
+
+            // Configurar el código de estado y devolver la respuesta en formato JSON
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = 401; // Código de estado HTTP 401 (Unauthorized)
+            await context.Response.WriteAsJsonAsync ( response );
+        }
     };
 } );
 
@@ -78,6 +101,10 @@ builder.Services.AddSwaggerGen ( c =>
 } );
 
 var app = builder.Build ( );
+
+// Configurar Middleware
+app.UseMiddleware<ErrorHandlingMiddleware> ( ); // Usar el middleware de manejo de errores
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment ( ))

@@ -1,4 +1,5 @@
 ﻿using Alianza.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,8 @@ namespace Alianza.Controllers
 {
     [Route ( "api/[controller]" )]
     [ApiController]
+    [Authorize] // Este controlador requiere autenticación
+
     public class ExclusiveDataController : ControllerBase
     {
         private readonly AlianzaContext _context;
