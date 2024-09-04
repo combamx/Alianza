@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX POST with JWT</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <button id="getUsersBtn">Obtener Usuarios</button>
+
+    <script>
+        $(document).ready(function() {
+            $('#getUsersBtn').click(function() {
+                $.ajax({
+                    url: 'https://localhost:7144/api/Users',
+                    type: 'GET', // Cambia a GET para obtener usuarios
+                    contentType: 'application/json',
+                    headers: {
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvbWFyLmNvcnRlcy5jYXNpbGxhc0BnbWFpbC5jb20iLCJqdGkiOiJhOTMyNDU4Zi1lY2M3LTQ3ODgtYjQyZi03YmVkMDZkMTYyM2UiLCJleHAiOjE3MjU0MjM0MDksImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjcxNDQiLCJhdWQiOiJodHRwczovL2xvY2FsaG9zdDo3MTQ0In0.SUicCrptaApCP7dNMFem3d-mvXe5ZV1mrnJ3Td9-QOs' // Tu token JWT
+                    },
+                    success: function(data) {
+                        console.log('Usuarios obtenidos:', data);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error al obtener usuarios:', textStatus, errorThrown);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

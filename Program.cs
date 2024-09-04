@@ -28,6 +28,15 @@ builder.Services.AddDbContext<AlianzaContext> ( options => options.UseSqlServer 
 // Registrar el servicio TokenService
 builder.Services.AddScoped<TokenService> ( ); // <--- Registrar el servicio aquí
 
+// Configurar CORS para permitir solicitudes de cualquier origen
+builder.Services.AddCors ( options =>
+{
+    options.AddPolicy ( "AllowAllOrigins" ,
+        builder => builder.AllowAnyOrigin ( )
+                          .AllowAnyMethod ( )
+                          .AllowAnyHeader ( ) );
+} );
+
 // Configurar JWT
 var jwtSettings = builder.Configuration.GetSection ( "JwtSettings" );
 var secretKeys = jwtSettings [ "SecretKey" ];
@@ -105,6 +114,9 @@ var app = builder.Build ( );
 // Configurar Middleware
 app.UseMiddleware<ErrorHandlingMiddleware> ( ); // Usar el middleware de manejo de errores
 
+
+// Usar la política de CORS configurada
+app.UseCors ( "AllowAllOrigins" );
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment ( ))
