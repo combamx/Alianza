@@ -9,6 +9,8 @@ namespace Alianza.Models
 {
     public partial class AlianzaContext : DbContext
     {
+        private readonly IConfiguration _configuration;
+
         public AlianzaContext ( )
         {
         }
